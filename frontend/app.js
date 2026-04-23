@@ -90,6 +90,7 @@ const dom = {
   dropdownMenu: $("dropdown-menu"),
   logScroll: $("log-scroll"),
 };
+
 let ws = null;
 let stream = null;
 let captureTimer = null;
@@ -99,6 +100,8 @@ let isStreaming = false;
 let alertCategories = [];
 let dropdownOpen = false;
 let currentPrediction = null;
+let predictionHistory = [];
+
 function addLog(type, msg) {
   const logScroll = dom.logScroll;
   const empty = logScroll.querySelector(".log-empty");
@@ -120,9 +123,21 @@ function setWsStatus(status) {
   dom.wsDot.style.background = WS_COLORS[status] || WS_COLORS.disconnected;
   dom.wsLabel.textContent = status;
 }
+
 function updatePrediction(det) {
-  const meta = SPECIES_MAP[det.animal] || {
-    label: det.animal,
+  predictionHistory.push(det.animal);
+  if (predictionHistory.length > 6) predictionHistory.shift();
+
+  const stableAnimal = [...predictionHistory]
+    .sort(
+      (a, b) =>
+        predictionHistory.filter((v) => v === a).length -
+        predictionHistory.filter((v) => v === b).length,
+    )
+    .pop();
+
+  const meta = SPECIES_MAP[stableAnimal] || {
+    label: stableAnimal,
     group: "none",
   };
   const gc = GROUP_COLORS[meta.group] || GROUP_COLORS.none;
@@ -131,28 +146,31 @@ function updatePrediction(det) {
   dom.predName.textContent = meta.label;
   dom.predName.className = "pred-name";
   dom.predName.style.color = gc.text;
+
   dom.confBarOuter.classList.remove("hidden");
+
   dom.confBarInner.style.width = `${det.confidence * 100}%`;
   dom.confBarInner.style.background = gc.border;
+
   dom.confLabel.classList.remove("hidden");
   dom.confLabel.textContent = `Confidence: ${fmtConf(det.confidence)}`;
   dom.predCard.style.borderColor = gc.border;
-  if (det.animal !== "empty") {
+
+  if (stableAnimal !== "empty") {
     dom.videoPredLabel.classList.remove("hidden");
     dom.videoPredLabel.style.borderColor = gc.border;
     dom.videoPredLabel.style.background = gc.bg;
     dom.videoPredName.textContent = meta.label;
     dom.videoPredName.style.color = gc.text;
     dom.videoPredConf.textContent = fmtConf(det.confidence);
-  } else {
-    dom.videoPredLabel.classList.add("hidden");
-  }
-  if (det.animal !== "empty") {
+
     dom.ambientGlow.style.background = `radial-gradient(ellipse at 50% 30%, ${gc.border}18 0%, transparent 70%)`;
   } else {
+    dom.videoPredLabel.classList.add("hidden");
     dom.ambientGlow.style.background = "none";
   }
-  updateSpeciesHighlight(det.animal);
+
+  updateSpeciesHighlight(stableAnimal);
 }
 
 function clearPrediction() {
@@ -421,9 +439,9 @@ function startCapture() {
     if (!ws || ws.readyState !== WebSocket.OPEN) return;
     if (dom.video.readyState < 2) return;
 
-    dom.canvas.width = 224;
-    dom.canvas.height = 224;
-    ctx.drawImage(dom.video, 0, 0, 224, 224);
+    dom.canvas.width = dom.video.videoWidth;
+    dom.canvas.height = dom.video.videoHeight;
+    ctx.drawImage(dom.video, 0, 0);
 
     const dataUrl = dom.canvas.toDataURL("image/jpeg", 0.85);
     const base64 = dataUrl.split(",")[1];
