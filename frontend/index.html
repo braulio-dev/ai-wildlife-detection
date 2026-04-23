@@ -1,0 +1,130 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Wildlife Detector</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦊</text></svg>" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  
+  <div id="ambient-glow" class="ambient-glow"></div>
+
+  
+  <div id="alert-container" class="alert-toast-container"></div>
+
+  
+  <header class="header">
+    <div class="header-left">
+      <span class="logo">◉</span>
+      <h1 class="title">Wildlife Detector</h1>
+      <span class="badge-live">LIVE</span>
+    </div>
+    <div class="header-right">
+      <div class="ws-chip">
+        <span id="ws-dot" class="ws-dot"></span>
+        <span id="ws-label" class="ws-label">disconnected</span>
+      </div>
+      <button id="settings-btn" class="settings-btn">⚙</button>
+    </div>
+  </header>
+
+  
+  <div id="settings-drawer" class="settings-drawer hidden">
+    <label class="settings-label">
+      WebSocket URL
+      <input id="input-ws-url" class="input-field" value="ws://localhost:8000/ws" />
+    </label>
+    <label class="settings-label">
+      Capture interval (ms)
+      <input id="input-interval" class="input-field" type="number" min="100" max="5000" step="100" value="500" />
+    </label>
+    <label class="settings-label">
+      Camera
+      <select id="input-camera" class="input-field"></select>
+    </label>
+  </div>
+
+  
+  <div class="main-grid">
+    
+    <div class="video-card">
+      <div class="video-wrapper">
+        <video id="video" class="video-element" playsinline muted></video>
+        <canvas id="canvas" class="hidden-canvas"></canvas>
+
+        <div id="video-overlay" class="video-overlay-top hidden">
+          <span class="rec-dot"></span>
+          <span class="overlay-text">REC</span>
+          <span id="fps-display" class="overlay-text">0 pred/s</span>
+        </div>
+
+        <div id="video-pred-label" class="video-pred-label hidden">
+          <span id="video-pred-icon" class="video-pred-icon"></span>
+          <span id="video-pred-name" class="video-pred-name"></span>
+          <span id="video-pred-conf" class="video-pred-conf"></span>
+        </div>
+
+        <div id="placeholder" class="placeholder">
+          <span class="placeholder-icon">🎥</span>
+          <span class="placeholder-text">Camera preview</span>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="btn-start" class="btn btn-start">▶ Start Detection</button>
+        <button id="btn-stop" class="btn btn-stop hidden">◼ Stop</button>
+      </div>
+    </div>
+
+    
+    <div class="sidebar">
+      
+      <div id="pred-card" class="card pred-card">
+        <span class="card-label">Current Detection</span>
+        <div id="pred-body" class="pred-body">
+          <span id="pred-icon" class="pred-icon pred-icon--empty">🔍</span>
+          <span id="pred-name" class="pred-waiting">Waiting for detection…</span>
+          <div id="conf-bar-outer" class="conf-bar-outer hidden">
+            <div id="conf-bar-inner" class="conf-bar-inner"></div>
+          </div>
+          <span id="conf-label" class="conf-label hidden"></span>
+        </div>
+      </div>
+
+      
+      <div class="card species-card">
+        <span class="card-label">Detectable Species (<span id="species-count"></span>)</span>
+        <div id="species-grid" class="species-grid"></div>
+      </div>
+
+      
+      <div class="card alert-config-card">
+        <span class="card-label">Alert Notifications</span>
+        <div id="dropdown" class="dropdown">
+          <button id="dropdown-trigger" class="dropdown-trigger">
+            <span id="dropdown-trigger-text" class="dropdown-trigger-text">Select species…</span>
+            <span id="dropdown-arrow" class="dropdown-arrow">▾</span>
+          </button>
+          <div id="dropdown-tags" class="dropdown-tags"></div>
+          <div id="dropdown-menu" class="dropdown-menu hidden"></div>
+        </div>
+      </div>
+
+      
+      <div class="card log-card">
+        <span class="card-label">Event Log</span>
+        <div id="log-scroll" class="log-scroll">
+          <span class="log-empty">No events yet</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+
