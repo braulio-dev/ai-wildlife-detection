@@ -28,7 +28,6 @@ def preprocess_image(image_data):
     std = np.array([0.229, 0.224, 0.225], dtype=np.float32)
     image_array = (image_array - mean) / std
 
-
     image_array = image_array.transpose((2, 0, 1))
     image_array = np.expand_dims(image_array, axis=0)
     
