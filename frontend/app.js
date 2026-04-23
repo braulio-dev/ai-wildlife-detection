@@ -1,78 +1,94 @@
 ﻿const SPECIES = [
-  { key: "empty",                  label: "Empty",                  icon: "🌲", group: "none" },
-  { key: "coyote",                 label: "Coyote",                 icon: "🐺", group: "mammal" },
-  { key: "reptile or amphibian",   label: "Reptile / Amphibian",    icon: "🦎", group: "herp" },
-  { key: "western spotted skunk",  label: "Western Spotted Skunk",  icon: "🦨", group: "mammal" },
-  { key: "american robin",         label: "American Robin",         icon: "🐦", group: "bird" },
-  { key: "leporidae family",       label: "Leporidae (Rabbit)",     icon: "🐇", group: "mammal" },
-  { key: "invertebrate",           label: "Invertebrate",           icon: "🪲", group: "invert" },
-  { key: "northern raccoon",       label: "Northern Raccoon",       icon: "🦝", group: "mammal" },
-  { key: "striped skunk",          label: "Striped Skunk",          icon: "🦨", group: "mammal" },
-  { key: "domestic dog",           label: "Domestic Dog",           icon: "🐕", group: "mammal" },
-  { key: "human",                  label: "Human",                  icon: "🧑", group: "human" },
-  { key: "small mammal",           label: "Small Mammal",           icon: "🐁", group: "mammal" },
-  { key: "gray fox",               label: "Gray Fox",               icon: "🦊", group: "mammal" },
-  { key: "other bird",             label: "Other Bird",             icon: "🐦", group: "bird" },
+  { key: "empty", label: "Empty", group: "none" },
+  { key: "coyote", label: "Coyote", group: "mammal" },
+  {
+    key: "reptile or amphibian",
+    label: "Reptile / Amphibian",
+    group: "herp",
+  },
+  {
+    key: "western spotted skunk",
+    label: "Western Spotted Skunk",
+    group: "mammal",
+  },
+  { key: "american robin", label: "American Robin", group: "bird" },
+  {
+    key: "leporidae family",
+    label: "Leporidae (Rabbit)",
+    group: "mammal",
+  },
+  { key: "invertebrate", label: "Invertebrate", group: "invert" },
+  {
+    key: "northern raccoon",
+    label: "Northern Raccoon",
+    group: "mammal",
+  },
+  { key: "striped skunk", label: "Striped Skunk", group: "mammal" },
+  { key: "domestic dog", label: "Domestic Dog", group: "mammal" },
+  { key: "human", label: "Human", group: "human" },
+  { key: "small mammal", label: "Small Mammal", group: "mammal" },
+  { key: "gray fox", label: "Gray Fox", group: "mammal" },
+  { key: "other bird", label: "Other Bird", group: "bird" },
 ];
 
 const SPECIES_MAP = {};
-SPECIES.forEach((s) => { SPECIES_MAP[s.key] = s; });
+SPECIES.forEach((s) => {
+  SPECIES_MAP[s.key] = s;
+});
 
 const GROUP_COLORS = {
-  none:   { bg: "rgba(100,116,139,0.15)", border: "#64748b", text: "#94a3b8" },
-  mammal: { bg: "rgba(37,99,235,0.12)",   border: "#3b82f6", text: "#60a5fa" },
-  bird:   { bg: "rgba(56,189,248,0.12)",  border: "#38bdf8", text: "#7dd3fc" },
-  herp:   { bg: "rgba(45,212,191,0.12)",  border: "#2dd4bf", text: "#5eead4" },
+  none: { bg: "rgba(100,116,139,0.15)", border: "#64748b", text: "#94a3b8" },
+  mammal: { bg: "rgba(37,99,235,0.12)", border: "#3b82f6", text: "#60a5fa" },
+  bird: { bg: "rgba(56,189,248,0.12)", border: "#38bdf8", text: "#7dd3fc" },
+  herp: { bg: "rgba(45,212,191,0.12)", border: "#2dd4bf", text: "#5eead4" },
   invert: { bg: "rgba(167,139,250,0.12)", border: "#a78bfa", text: "#c4b5fd" },
-  human:  { bg: "rgba(251,146,60,0.12)",  border: "#fb923c", text: "#fdba74" },
+  human: { bg: "rgba(251,146,60,0.12)", border: "#fb923c", text: "#fdba74" },
 };
 
 const WS_COLORS = {
   disconnected: "#64748b",
-  connecting:   "#eab308",
-  connected:    "#3b82f6",
-  error:        "#ef4444",
+  connecting: "#eab308",
+  connected: "#3b82f6",
+  error: "#ef4444",
 };
 
 const fmtConf = (v) => `${(v * 100).toFixed(1)}%`;
 const $ = (id) => document.getElementById(id);
 
 const dom = {
-  ambientGlow:     $("ambient-glow"),
-  alertContainer:  $("alert-container"),
-  wsDot:           $("ws-dot"),
-  wsLabel:         $("ws-label"),
-  settingsBtn:     $("settings-btn"),
-  settingsDrawer:  $("settings-drawer"),
-  inputWsUrl:      $("input-ws-url"),
-  inputInterval:   $("input-interval"),
-  inputCamera:     $("input-camera"),
-  video:           $("video"),
-  canvas:          $("canvas"),
-  videoOverlay:    $("video-overlay"),
-  fpsDisplay:      $("fps-display"),
-  videoPredLabel:  $("video-pred-label"),
-  videoPredIcon:   $("video-pred-icon"),
-  videoPredName:   $("video-pred-name"),
-  videoPredConf:   $("video-pred-conf"),
-  placeholder:     $("placeholder"),
-  btnStart:        $("btn-start"),
-  btnStop:         $("btn-stop"),
-  predCard:        $("pred-card"),
-  predIcon:        $("pred-icon"),
-  predName:        $("pred-name"),
-  confBarOuter:    $("conf-bar-outer"),
-  confBarInner:    $("conf-bar-inner"),
-  confLabel:       $("conf-label"),
-  speciesCount:    $("species-count"),
-  speciesGrid:     $("species-grid"),
-  dropdown:        $("dropdown"),
+  ambientGlow: $("ambient-glow"),
+  alertContainer: $("alert-container"),
+  wsDot: $("ws-dot"),
+  wsLabel: $("ws-label"),
+  settingsBtn: $("settings-btn"),
+  settingsDrawer: $("settings-drawer"),
+  inputWsUrl: $("input-ws-url"),
+  inputInterval: $("input-interval"),
+  inputCamera: $("input-camera"),
+  video: $("video"),
+  canvas: $("canvas"),
+  videoOverlay: $("video-overlay"),
+  fpsDisplay: $("fps-display"),
+  videoPredLabel: $("video-pred-label"),
+  videoPredName: $("video-pred-name"),
+  videoPredConf: $("video-pred-conf"),
+  placeholder: $("placeholder"),
+  btnStart: $("btn-start"),
+  btnStop: $("btn-stop"),
+  predCard: $("pred-card"),
+  predName: $("pred-name"),
+  confBarOuter: $("conf-bar-outer"),
+  confBarInner: $("conf-bar-inner"),
+  confLabel: $("conf-label"),
+  speciesCount: $("species-count"),
+  speciesGrid: $("species-grid"),
+  dropdown: $("dropdown"),
   dropdownTrigger: $("dropdown-trigger"),
-  dropdownText:    $("dropdown-trigger-text"),
-  dropdownArrow:   $("dropdown-arrow"),
-  dropdownTags:    $("dropdown-tags"),
-  dropdownMenu:    $("dropdown-menu"),
-  logScroll:       $("log-scroll"),
+  dropdownText: $("dropdown-trigger-text"),
+  dropdownArrow: $("dropdown-arrow"),
+  dropdownTags: $("dropdown-tags"),
+  dropdownMenu: $("dropdown-menu"),
+  logScroll: $("log-scroll"),
 };
 let ws = null;
 let stream = null;
@@ -91,9 +107,9 @@ function addLog(type, msg) {
   const row = document.createElement("div");
   row.className = "log-row";
   row.innerHTML = `
-    <span class="log-dot log-dot--${type}"></span>
-    <span class="log-time">${new Date().toLocaleTimeString()}</span>
-    <span class="log-msg">${msg}</span>
+  <span class="log-dot log-dot--${type}"></span>
+  <span class="log-time">${new Date().toLocaleTimeString()}</span>
+  <span class="log-msg">${msg}</span>
   `;
   logScroll.prepend(row);
   while (logScroll.children.length > 60) {
@@ -105,12 +121,13 @@ function setWsStatus(status) {
   dom.wsLabel.textContent = status;
 }
 function updatePrediction(det) {
-  const meta = SPECIES_MAP[det.animal] || { label: det.animal, icon: "❓", group: "none" };
+  const meta = SPECIES_MAP[det.animal] || {
+    label: det.animal,
+    group: "none",
+  };
   const gc = GROUP_COLORS[meta.group] || GROUP_COLORS.none;
 
   currentPrediction = { ...det, ...meta, gc };
-  dom.predIcon.textContent = meta.icon;
-  dom.predIcon.className = "pred-icon";
   dom.predName.textContent = meta.label;
   dom.predName.className = "pred-name";
   dom.predName.style.color = gc.text;
@@ -124,7 +141,6 @@ function updatePrediction(det) {
     dom.videoPredLabel.classList.remove("hidden");
     dom.videoPredLabel.style.borderColor = gc.border;
     dom.videoPredLabel.style.background = gc.bg;
-    dom.videoPredIcon.textContent = meta.icon;
     dom.videoPredName.textContent = meta.label;
     dom.videoPredName.style.color = gc.text;
     dom.videoPredConf.textContent = fmtConf(det.confidence);
@@ -132,8 +148,7 @@ function updatePrediction(det) {
     dom.videoPredLabel.classList.add("hidden");
   }
   if (det.animal !== "empty") {
-    dom.ambientGlow.style.background =
-      `radial-gradient(ellipse at 50% 30%, ${gc.border}18 0%, transparent 70%)`;
+    dom.ambientGlow.style.background = `radial-gradient(ellipse at 50% 30%, ${gc.border}18 0%, transparent 70%)`;
   } else {
     dom.ambientGlow.style.background = "none";
   }
@@ -142,8 +157,6 @@ function updatePrediction(det) {
 
 function clearPrediction() {
   currentPrediction = null;
-  dom.predIcon.textContent = "🔍";
-  dom.predIcon.className = "pred-icon pred-icon--empty";
   dom.predName.textContent = "Waiting for detection…";
   dom.predName.className = "pred-waiting";
   dom.predName.style.color = "";
@@ -162,9 +175,8 @@ function buildSpeciesGrid() {
     chip.className = "species-chip";
     chip.dataset.key = sp.key;
     chip.innerHTML = `
-      <span class="species-chip-icon">${sp.icon}</span>
-      <span class="species-chip-name">${sp.label}</span>
-    `;
+  <span class="species-chip-name">${sp.label}</span>
+  `;
     dom.speciesGrid.appendChild(chip);
   });
 }
@@ -192,10 +204,9 @@ function buildDropdownMenu() {
     opt.className = "dropdown-option";
     opt.dataset.key = sp.key;
     opt.innerHTML = `
-      <div class="dropdown-check"></div>
-      <span class="dropdown-option-icon">${sp.icon}</span>
-      <span class="dropdown-option-label">${sp.label}</span>
-    `;
+  <div class="dropdown-check"></div>
+  <span class="dropdown-option-label">${sp.label}</span>
+  `;
     opt.addEventListener("click", (e) => {
       e.stopPropagation();
       toggleAlertCategory(sp.key);
@@ -229,19 +240,19 @@ function toggleAlertCategory(key) {
 }
 
 function syncDropdownUI() {
-  dom.dropdownText.textContent = alertCategories.length === 0
-    ? "Select species…"
-    : `${alertCategories.length} species selected`;
+  dom.dropdownText.textContent =
+    alertCategories.length === 0
+      ? "Select species…"
+      : `${alertCategories.length} species selected`;
   dom.dropdownTags.innerHTML = "";
   alertCategories.forEach((key) => {
     const sp = SPECIES_MAP[key];
     const tag = document.createElement("span");
     tag.className = "dropdown-tag";
     tag.innerHTML = `
-      <span>${sp.icon}</span>
-      <span>${sp.label}</span>
-      <button class="dropdown-tag-remove">✕</button>
-    `;
+  <span>${sp.label}</span>
+  <button class="dropdown-tag-remove">✕</button>
+  `;
     tag.querySelector(".dropdown-tag-remove").addEventListener("click", (e) => {
       e.stopPropagation();
       toggleAlertCategory(key);
@@ -261,21 +272,23 @@ function syncDropdownUI() {
 function sendAlertCategories() {
   if (ws && ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({ categories: alertCategories }));
-    addLog("info", `Alert categories: ${alertCategories.length > 0 ? alertCategories.join(", ") : "none"}`);
+    addLog(
+      "info",
+      `Alert categories: ${alertCategories.length > 0 ? alertCategories.join(", ") : "none"}`,
+    );
   }
 }
 function showAlertToast(alertData) {
-  const meta = SPECIES_MAP[alertData.animal] || { icon: "⚠️" };
+  const meta = SPECIES_MAP[alertData.animal];
   const toast = document.createElement("div");
   toast.className = "alert-toast";
   toast.innerHTML = `
-    <span class="alert-toast-dot"></span>
-    <span class="alert-toast-icon">${meta.icon}</span>
-    <div class="alert-toast-body">
-      <span class="alert-toast-title">${alertData.animal.charAt(0).toUpperCase() + alertData.animal.slice(1)} detected</span>
-      <span class="alert-toast-msg">${fmtConf(alertData.confidence)} confidence</span>
-    </div>
-    <button class="alert-toast-close">✕</button>
+  <span class="alert-toast-dot"></span>
+  <div class="alert-toast-body">
+  <span class="alert-toast-title">${alertData.animal.charAt(0).toUpperCase() + alertData.animal.slice(1)} detected</span>
+  <span class="alert-toast-msg">${fmtConf(alertData.confidence)} confidence</span>
+  </div>
+  <button class="alert-toast-close">✕</button>
   `;
 
   const dismiss = () => {
@@ -292,7 +305,9 @@ function showAlertToast(alertData) {
 }
 async function enumerateCameras() {
   try {
-    const tempStream = await navigator.mediaDevices.getUserMedia({ video: true });
+    const tempStream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+    });
     tempStream.getTracks().forEach((t) => t.stop());
 
     const devices = await navigator.mediaDevices.enumerateDevices();
@@ -315,7 +330,11 @@ async function startCamera() {
     const deviceId = dom.inputCamera.value;
     const constraints = {
       video: deviceId
-        ? { deviceId: { exact: deviceId }, width: { ideal: 1280 }, height: { ideal: 720 } }
+        ? {
+            deviceId: { exact: deviceId },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          }
         : { width: { ideal: 1280 }, height: { ideal: 720 } },
       audio: false,
     };
@@ -467,4 +486,3 @@ document.addEventListener("click", (e) => {
 buildSpeciesGrid();
 buildDropdownMenu();
 enumerateCameras();
-

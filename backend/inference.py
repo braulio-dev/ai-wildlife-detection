@@ -15,7 +15,7 @@ def predict(image):
     predicted_index = probabilities.argmax()
     
     predicted_category = CATEGORIES[predicted_index]
-    
+
     return {
         "animal": predicted_category,
         "confidence": float(probabilities[predicted_index])

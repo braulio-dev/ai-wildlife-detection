@@ -1,11 +1,19 @@
 from fastapi import FastAPI, WebSocket
 from fastapi.websockets import WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
 
 from preprocess import preprocess_image
 from inference import predict
 from alerts import update_categories, should_send_alert
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -20,7 +28,6 @@ async def websocket_endpoint(websocket: WebSocket):
                 preprocessed_image = preprocess_image(image_data)
                 prediction = predict(preprocessed_image)
                 alert = should_send_alert(prediction)
-                
                 
                 await websocket.send_json({
                     "detection": prediction,
