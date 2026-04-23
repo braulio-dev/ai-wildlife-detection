@@ -17,6 +17,8 @@ def preprocess_image(image_data):
     
     # Pad the image to 288x288 with black background
     image = ImageOps.pad(image, (288, 288), color=(0, 0, 0))
+
+    pil_debug = image.copy()
     
     # Normalize pixel values to [0, 1]
     image_array = np.array(image, dtype=np.float32) / 255.0
@@ -30,4 +32,4 @@ def preprocess_image(image_data):
     image_array = image_array.transpose((2, 0, 1))
     image_array = np.expand_dims(image_array, axis=0)
     
-    return image_array
+    return image_array, pil_debug

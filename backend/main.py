@@ -25,8 +25,8 @@ async def websocket_endpoint(websocket: WebSocket):
             
             if "image" in data:
                 image_data = data["image"]
-                preprocessed_image = preprocess_image(image_data)
-                prediction = predict(preprocessed_image)
+                preprocessed_image, debug_pil = preprocess_image(image_data)
+                prediction = predict(preprocessed_image, debug_image=debug_pil)
                 alert = should_send_alert(prediction)
                 
                 await websocket.send_json({
