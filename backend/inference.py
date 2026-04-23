@@ -1,8 +1,15 @@
 import onnxruntime as ort
+import numpy as np
+import os
 
-session = ort.InferenceSession("backend/models/model.onnx")
+BASE_DIR = os.path.dirname(__file__)
+session = ort.InferenceSession(os.path.join(BASE_DIR, "..", "notebook", "arch1_ft.onnx"))
 
 CATEGORIES =  ["empty", "coyote", "reptile or amphibian", "western spotted skunk", "american robin", "leporidae family", "invertebrate", "northern raccoon", "striped skunk", "domestic dog", "human", "small mammal", "gray fox", "other bird"]
+
+def softmax(x):
+    e_x = np.exp(x - np.max(x))
+    return e_x / e_x.sum()
 
 def predict(image):
     input_name = session.get_inputs()[0].name
@@ -10,7 +17,8 @@ def predict(image):
     
     outputs = session.run([output_name], {input_name: image})
     
-    probabilities = outputs[0][0]
+    logits = outputs[0][0]
+    probabilities = softmax(logits)
     
     predicted_index = probabilities.argmax()
     

@@ -421,9 +421,9 @@ function startCapture() {
     if (!ws || ws.readyState !== WebSocket.OPEN) return;
     if (dom.video.readyState < 2) return;
 
-    dom.canvas.width = 224;
-    dom.canvas.height = 224;
-    ctx.drawImage(dom.video, 0, 0, 224, 224);
+    dom.canvas.width = 288;
+    dom.canvas.height = 288;
+    ctx.drawImage(dom.video, 0, 0, 288, 288);
 
     const dataUrl = dom.canvas.toDataURL("image/jpeg", 0.85);
     const base64 = dataUrl.split(",")[1];
