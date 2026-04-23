@@ -7,6 +7,11 @@
     group: "herp",
   },
   {
+    key: "california ground squirrel",
+    label: "California Ground Squirrel",
+    group: "mammal",
+  },
+  {
     key: "western spotted skunk",
     label: "Western Spotted Skunk",
     group: "mammal",
@@ -25,7 +30,6 @@
   },
   { key: "striped skunk", label: "Striped Skunk", group: "mammal" },
   { key: "domestic dog", label: "Domestic Dog", group: "mammal" },
-  { key: "human", label: "Human", group: "human" },
   { key: "small mammal", label: "Small Mammal", group: "mammal" },
   { key: "gray fox", label: "Gray Fox", group: "mammal" },
   { key: "other bird", label: "Other Bird", group: "bird" },
@@ -42,7 +46,6 @@ const GROUP_COLORS = {
   bird: { bg: "rgba(56,189,248,0.12)", border: "#38bdf8", text: "#7dd3fc" },
   herp: { bg: "rgba(45,212,191,0.12)", border: "#2dd4bf", text: "#5eead4" },
   invert: { bg: "rgba(167,139,250,0.12)", border: "#a78bfa", text: "#c4b5fd" },
-  human: { bg: "rgba(251,146,60,0.12)", border: "#fb923c", text: "#fdba74" },
 };
 
 const WS_COLORS = {
@@ -80,15 +83,7 @@ const dom = {
   confBarOuter: $("conf-bar-outer"),
   confBarInner: $("conf-bar-inner"),
   confLabel: $("conf-label"),
-  speciesCount: $("species-count"),
-  speciesGrid: $("species-grid"),
-  dropdown: $("dropdown"),
-  dropdownTrigger: $("dropdown-trigger"),
-  dropdownText: $("dropdown-trigger-text"),
-  dropdownArrow: $("dropdown-arrow"),
-  dropdownTags: $("dropdown-tags"),
-  dropdownMenu: $("dropdown-menu"),
-  logScroll: $("log-scroll"),
+  alertGrid: $("alert-grid"),
 };
 
 let ws = null;
@@ -97,31 +92,17 @@ let captureTimer = null;
 let fpsTimer = null;
 let frameCount = 0;
 let isStreaming = false;
-let alertCategories = [];
-let dropdownOpen = false;
+let alertCategories = SPECIES.filter((sp) => sp.key !== "empty").map((sp) => sp.key);
 let currentPrediction = null;
 let predictionHistory = [];
-
-function addLog(type, msg) {
-  const logScroll = dom.logScroll;
-  const empty = logScroll.querySelector(".log-empty");
-  if (empty) empty.remove();
-
-  const row = document.createElement("div");
-  row.className = "log-row";
-  row.innerHTML = `
-  <span class="log-dot log-dot--${type}"></span>
-  <span class="log-time">${new Date().toLocaleTimeString()}</span>
-  <span class="log-msg">${msg}</span>
-  `;
-  logScroll.prepend(row);
-  while (logScroll.children.length > 60) {
-    logScroll.removeChild(logScroll.lastChild);
-  }
-}
 function setWsStatus(status) {
-  dom.wsDot.style.background = WS_COLORS[status] || WS_COLORS.disconnected;
-  dom.wsLabel.textContent = status;
+  if (dom.wsDot) {
+    dom.wsDot.style.background = WS_COLORS[status] || WS_COLORS.disconnected;
+  }
+
+  if (dom.wsLabel) {
+    dom.wsLabel.textContent = status;
+  }
 }
 
 function updatePrediction(det) {
@@ -164,13 +145,11 @@ function updatePrediction(det) {
     dom.videoPredName.style.color = gc.text;
     dom.videoPredConf.textContent = fmtConf(det.confidence);
 
-    dom.ambientGlow.style.background = `radial-gradient(ellipse at 50% 30%, ${gc.border}18 0%, transparent 70%)`;
   } else {
     dom.videoPredLabel.classList.add("hidden");
-    dom.ambientGlow.style.background = "none";
   }
 
-  updateSpeciesHighlight(stableAnimal);
+  updateAlertGrid(stableAnimal);
 }
 
 function clearPrediction() {
@@ -182,68 +161,59 @@ function clearPrediction() {
   dom.confLabel.classList.add("hidden");
   dom.predCard.style.borderColor = "";
   dom.videoPredLabel.classList.add("hidden");
-  dom.ambientGlow.style.background = "none";
-  updateSpeciesHighlight(null);
+  updateAlertGrid(null);
 }
-function buildSpeciesGrid() {
-  dom.speciesCount.textContent = SPECIES.length;
-  dom.speciesGrid.innerHTML = "";
+
+function buildAlertGrid() {
+  dom.alertGrid.innerHTML = "";
   SPECIES.forEach((sp) => {
-    const chip = document.createElement("div");
+    const chip = document.createElement("button");
+    chip.type = "button";
     chip.className = "species-chip";
     chip.dataset.key = sp.key;
     chip.innerHTML = `
   <span class="species-chip-name">${sp.label}</span>
   `;
-    dom.speciesGrid.appendChild(chip);
+
+    if (sp.key === "empty") {
+      chip.disabled = true;
+      chip.classList.add("species-chip--disabled");
+    } else {
+      chip.addEventListener("click", () => {
+        toggleAlertCategory(sp.key);
+      });
+    }
+
+    dom.alertGrid.appendChild(chip);
   });
+  updateAlertGrid(null);
 }
 
-function updateSpeciesHighlight(activeKey) {
-  dom.speciesGrid.querySelectorAll(".species-chip").forEach((chip) => {
+function updateAlertGrid(activeKey) {
+  dom.alertGrid.querySelectorAll(".species-chip").forEach((chip) => {
     const key = chip.dataset.key;
     const sp = SPECIES_MAP[key];
-    const gc = GROUP_COLORS[sp.group];
-    if (key === activeKey) {
-      chip.classList.add("species-chip--active");
-      chip.style.background = gc.bg;
-      chip.style.borderColor = gc.border;
-    } else {
-      chip.classList.remove("species-chip--active");
+    const isSelected = alertCategories.includes(key);
+    const isActive = key === activeKey;
+
+    chip.classList.toggle("species-chip--active", isActive);
+    chip.classList.toggle("species-chip--selected", isSelected);
+    chip.classList.toggle("species-chip--unselected", !isSelected && key !== "empty");
+
+    if (key === "empty") {
       chip.style.background = "";
       chip.style.borderColor = "";
+      chip.style.color = "";
+    } else if (isSelected) {
+      chip.style.background = "rgba(34, 197, 94, 0.16)";
+      chip.style.borderColor = "#22c55e";
+      chip.style.color = "#bbf7d0";
+    } else {
+      chip.style.background = "rgba(239, 68, 68, 0.14)";
+      chip.style.borderColor = "#ef4444";
+      chip.style.color = "#fecaca";
     }
   });
-}
-function buildDropdownMenu() {
-  dom.dropdownMenu.innerHTML = "";
-  SPECIES.filter((sp) => sp.key !== "empty").forEach((sp) => {
-    const opt = document.createElement("div");
-    opt.className = "dropdown-option";
-    opt.dataset.key = sp.key;
-    opt.innerHTML = `
-  <div class="dropdown-check"></div>
-  <span class="dropdown-option-label">${sp.label}</span>
-  `;
-    opt.addEventListener("click", (e) => {
-      e.stopPropagation();
-      toggleAlertCategory(sp.key);
-    });
-    dom.dropdownMenu.appendChild(opt);
-  });
-  syncDropdownUI();
-}
-
-function toggleDropdown() {
-  dropdownOpen = !dropdownOpen;
-  dom.dropdownMenu.classList.toggle("hidden", !dropdownOpen);
-  dom.dropdownArrow.classList.toggle("dropdown-arrow--open", dropdownOpen);
-}
-
-function closeDropdown() {
-  dropdownOpen = false;
-  dom.dropdownMenu.classList.add("hidden");
-  dom.dropdownArrow.classList.remove("dropdown-arrow--open");
 }
 
 function toggleAlertCategory(key) {
@@ -253,47 +223,13 @@ function toggleAlertCategory(key) {
   } else {
     alertCategories.push(key);
   }
-  syncDropdownUI();
+  updateAlertGrid(currentPrediction?.animal ?? null);
   sendAlertCategories();
-}
-
-function syncDropdownUI() {
-  dom.dropdownText.textContent =
-    alertCategories.length === 0
-      ? "Select species…"
-      : `${alertCategories.length} species selected`;
-  dom.dropdownTags.innerHTML = "";
-  alertCategories.forEach((key) => {
-    const sp = SPECIES_MAP[key];
-    const tag = document.createElement("span");
-    tag.className = "dropdown-tag";
-    tag.innerHTML = `
-  <span>${sp.label}</span>
-  <button class="dropdown-tag-remove">✕</button>
-  `;
-    tag.querySelector(".dropdown-tag-remove").addEventListener("click", (e) => {
-      e.stopPropagation();
-      toggleAlertCategory(key);
-    });
-    dom.dropdownTags.appendChild(tag);
-  });
-  dom.dropdownMenu.querySelectorAll(".dropdown-option").forEach((opt) => {
-    const key = opt.dataset.key;
-    const check = opt.querySelector(".dropdown-check");
-    const selected = alertCategories.includes(key);
-    opt.classList.toggle("dropdown-option--selected", selected);
-    check.classList.toggle("dropdown-check--active", selected);
-    check.textContent = selected ? "✓" : "";
-  });
 }
 
 function sendAlertCategories() {
   if (ws && ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify({ categories: alertCategories }));
-    addLog(
-      "info",
-      `Alert categories: ${alertCategories.length > 0 ? alertCategories.join(", ") : "none"}`,
-    );
   }
 }
 function showAlertToast(alertData) {
@@ -339,7 +275,7 @@ async function enumerateCameras() {
       dom.inputCamera.appendChild(opt);
     });
   } catch (err) {
-    addLog("error", `Camera access denied: ${err.message}`);
+    console.error("Camera access denied:", err);
   }
 }
 
@@ -359,9 +295,8 @@ async function startCamera() {
     stream = await navigator.mediaDevices.getUserMedia(constraints);
     dom.video.srcObject = stream;
     await dom.video.play();
-    addLog("success", "Camera started");
   } catch (err) {
-    addLog("error", `Camera error: ${err.message}`);
+    console.error("Camera error:", err);
   }
 }
 
@@ -377,13 +312,11 @@ function connectWs() {
   if (ws && ws.readyState <= 1) return;
 
   setWsStatus("connecting");
-  addLog("info", `Connecting to ${url}…`);
 
   ws = new WebSocket(url);
 
   ws.onopen = () => {
     setWsStatus("connected");
-    addLog("success", "WebSocket connected");
     if (alertCategories.length > 0) {
       ws.send(JSON.stringify({ categories: alertCategories }));
     }
@@ -400,21 +333,18 @@ function connectWs() {
 
       if (data.alert) {
         showAlertToast(data.alert);
-        addLog("alert", data.alert.message);
       }
     } catch (e) {
-      addLog("error", `Bad message: ${e.message}`);
+      console.error("Bad message:", e);
     }
   };
 
   ws.onerror = () => {
     setWsStatus("error");
-    addLog("error", "WebSocket error");
   };
 
   ws.onclose = () => {
     setWsStatus("disconnected");
-    addLog("info", "WebSocket closed");
   };
 }
 
@@ -466,8 +396,6 @@ async function handleStart() {
   dom.btnStop.classList.remove("hidden");
   dom.placeholder.classList.add("hidden");
   dom.videoOverlay.classList.remove("hidden");
-
-  addLog("info", "Detection started");
 }
 
 function handleStop() {
@@ -482,7 +410,6 @@ function handleStop() {
   dom.videoOverlay.classList.add("hidden");
 
   clearPrediction();
-  addLog("info", "Detection stopped");
 }
 dom.btnStart.addEventListener("click", handleStart);
 dom.btnStop.addEventListener("click", handleStop);
@@ -491,16 +418,5 @@ dom.settingsBtn.addEventListener("click", () => {
   dom.settingsDrawer.classList.toggle("hidden");
 });
 
-dom.dropdownTrigger.addEventListener("click", (e) => {
-  e.stopPropagation();
-  toggleDropdown();
-});
-
-document.addEventListener("click", (e) => {
-  if (!dom.dropdown.contains(e.target)) {
-    closeDropdown();
-  }
-});
-buildSpeciesGrid();
-buildDropdownMenu();
+buildAlertGrid();
 enumerateCameras();

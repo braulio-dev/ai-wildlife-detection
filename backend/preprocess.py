@@ -1,5 +1,5 @@
 import base64
-from PIL import Image, ImageOps
+from PIL import Image
 import numpy as np 
 from io import BytesIO
 
@@ -14,9 +14,19 @@ def preprocess_image(image_data):
     
     if image.mode != 'RGB':
         image = image.convert('RGB')
-    
-    # Pad the image to 288x288 with black background
-    image = ImageOps.pad(image, (288, 288), color=(0, 0, 0))
+
+    image = image.crop((0, 0, image.width, int(image.height * 0.94)))
+
+    scale = 320 / min(image.width, image.height)
+    resized = (
+        max(1, round(image.width * scale)),
+        max(1, round(image.height * scale)),
+    )
+    image = image.resize(resized, Image.Resampling.BILINEAR)
+
+    left = (image.width - 288) // 2
+    top = (image.height - 288) // 2
+    image = image.crop((left, top, left + 288, top + 288))
 
     pil_debug = image.copy()
     
