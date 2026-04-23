@@ -5,7 +5,22 @@ import os
 BASE_DIR = os.path.dirname(__file__)
 session = ort.InferenceSession(os.path.join(BASE_DIR, "..", "notebook", "arch1_ft.onnx"))
 
-CATEGORIES =  ["empty", "coyote", "reptile or amphibian", "western spotted skunk", "american robin", "leporidae family", "invertebrate", "northern raccoon", "striped skunk", "domestic dog", "human", "small mammal", "gray fox", "other bird"]
+CATEGORIES = [
+    "empty",
+    "coyote",
+    "reptile or amphibian",
+    "california ground squirrel",
+    "western spotted skunk",
+    "american robin",
+    "leporidae family",
+    "invertebrate",
+    "northern raccoon",
+    "striped skunk",
+    "domestic dog",
+    "small mammal",
+    "gray fox",
+    "other bird",
+]
 
 MIN_CONFIDENCE = 0.45
 
