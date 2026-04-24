@@ -32,5 +32,6 @@ uvicorn main:app
 From the `frontend/` folder:
 
 ```bash
+npm install
 npm run dev
 ```
